@@ -22,14 +22,14 @@ Dialog DLL:      TCM.DLL V1.36.2.0
  
 <h2>Project:</h2>
 D:\MKG\STM32\STMProjeler\nucleo64i2ctimer\MDK-ARM\nucleo64i2ctimer.uvprojx
-Project File Date:  12/22/2019
+Project File Date:  12/29/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'D:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'nucleo64i2ctimer'
 compiling main.c...
 linking...
-Program Size: Code=10556 RO-data=508 RW-data=20 ZI-data=1292  
+Program Size: Code=11460 RO-data=508 RW-data=24 ZI-data=1448  
 FromELF: creating hex file...
 "nucleo64i2ctimer\nucleo64i2ctimer.axf" - 0 Error(s), 0 Warning(s).
 
@@ -40,6 +40,14 @@ Package Vendor: ARM
                 ARM.CMSIS.5.6.0
                 CMSIS (Cortex Microcontroller Software Interface Standard)
    * Component: CORE Version: 5.3.0
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.ARM_Compiler.1.6.2.pack
+                Keil.ARM_Compiler.1.6.2
+                Keil ARM Compiler extensions for ARM Compiler 5 and ARM Compiler 6
+   * Component: STDERR Variant: ITM Version: 1.2.0
+   * Component: STDIN Variant: ITM Version: 1.2.0
+   * Component: STDOUT Variant: ITM Version: 1.2.0
 
 Package Vendor: Keil
                 http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.14.0.pack
@@ -54,6 +62,15 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.3.0
+
+   * Component: Keil.ARM Compiler::Compiler:I/O:STDERR:ITM:1.2.0
+      Source file:   Source\retarget_io.c
+
+   * Component: Keil.ARM Compiler::Compiler:I/O:STDIN:ITM:1.2.0
+      Source file:   Source\retarget_io.c
+
+   * Component: Keil.ARM Compiler::Compiler:I/O:STDOUT:ITM:1.2.0
+      Source file:   Source\retarget_io.c
 Build Time Elapsed:  00:00:03
 </pre>
 </body>

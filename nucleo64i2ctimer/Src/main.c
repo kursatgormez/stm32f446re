@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
@@ -42,6 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c3;
 
 TIM_HandleTypeDef htim6;
@@ -50,7 +50,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
-double data[6];
+float data[6];
+char uartmatlab[100];
 
 /* USER CODE END PV */
 
@@ -59,6 +60,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_TIM6_Init(void);
+static void MX_I2C1_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -104,10 +106,10 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C3_Init();
   MX_TIM6_Init();
+  MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 	initSensor();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -163,6 +165,40 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
 }
 
 /**
@@ -253,7 +289,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -321,8 +357,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void getSensor(){
 
-		uint8_t i2cBuf[14] ;
-		uint16_t ax ,ay ,az ,gx,gy,gz;	
+		uint8_t i2cBuf[15] ;
+		int16_t ax ,ay ,az ,gx,gy,gz;	
 		i2cBuf[0] = 0x3B; //register adress X_axis H
 	
 		/*
@@ -330,18 +366,16 @@ void getSensor(){
 		float Temperature;
 		*/
 	
-	
 		HAL_I2C_Master_Transmit(&hi2c3,MPU9265ADRESS,i2cBuf,1,1000);
 		HAL_I2C_Master_Receive(&hi2c3,MPU9265ADRESS | 0x01 ,i2cBuf,14,1000);
 	
-		
 		//scale etme ve printler
 		
-		ax = -(i2cBuf[0]<<8 | i2cBuf[1]);
-		ay = -(i2cBuf[2]<<8 | i2cBuf[3]);
-		az = -(i2cBuf[4]<<8 | i2cBuf[5]);
+		ax = -(i2cBuf[0] << 8 | i2cBuf[1]);
+		ay = -(i2cBuf[2] << 8 | i2cBuf[3]);
+		az =  (i2cBuf[4] << 8 | i2cBuf[5]);
 		
-		data[0] = ax / 2048.0 ;
+		data[0] = ax / 2048.0;
 		data[1] = ay / 2048.0;
 		data[2] = az / 2048.0;
 		
@@ -351,26 +385,27 @@ void getSensor(){
 		printf("%f\n",Temperature);
 		*/
 		
-		gx = 	(i2cBuf[8] << 8 | i2cBuf[9]);
-		gy =	(i2cBuf[10] << 8 | i2cBuf[11]);
+		gx = -(i2cBuf[8] << 8 | i2cBuf[9]);
+		gy = -(i2cBuf[10] << 8 | i2cBuf[11]);
 		gz =  (i2cBuf[12] << 8 | i2cBuf[13]);
 		
 		data[3] = gx / 16.4;
 		data[4] = gy / 16.4;
-		data[5] = gz / 16.4 ;
+		data[5] = gz / 16.4	;
 	
 }
 
 void initSensor(void){
+	
 	uint8_t i2cBuf[2] ;
 	HAL_TIM_Base_Start_IT(&htim6);
 	
 	i2cBuf[0] = 28 ; //register accelometer
-	i2cBuf[1] = 12 ; //data to write , +-8g range
+	i2cBuf[1] = 24 ; //data to write , +-8g range
 	HAL_I2C_Master_Transmit(&hi2c3,MPU9265ADRESS,i2cBuf,2,1000); 
 	
 	i2cBuf[0] = 0x1B ;
-	i2cBuf[1] = 12;
+	i2cBuf[1] = 24;
 	HAL_I2C_Master_Transmit(&hi2c3,MPU9265ADRESS,i2cBuf,2,1000); 
 	
 }
@@ -378,9 +413,12 @@ void initSensor(void){
 void printSensor(){
 	
 	printf("--------\n");
-	printf("Acc : %lf \t %lf \t %lf \t \n",data[0],data[1],data[2]);
-	printf("Gyro : %lf \t %lf \t %lf \t \n",data[3],data[4],data[5]);
+	printf("Acc :\t %.6f \t %f \t %f \t \n",data[0],data[1],data[2]);
+	printf("Gyro :\t %.6f \t %f \t %f \t \n",data[3],data[4],data[5]);
 	
+	sprintf(uartmatlab ,"%f %f %f %f %f %f\n",data[0],data[1],data[2],data[3],data[4],data[5]);
+
+	HAL_UART_Transmit(&huart2,(uint8_t*)uartmatlab,100,100);
 	
 }
 
